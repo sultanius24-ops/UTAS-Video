@@ -11,7 +11,7 @@ export const FINALE_DURATION = 270;
 const LOGO = staticFile('images/quality-day-logo.png');
 const LOGO_W = 780;
 const LOGO_H = Math.round((LOGO_W * 850) / 1328);
-const POP = 26;
+export const POP = 26;
 
 // Two satin arcs (blue + orange) that whip around and "draw" the logo into place.
 const Swooshes: React.FC = () => {

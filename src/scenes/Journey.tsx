@@ -5,7 +5,7 @@ import {MaskReveal} from '../components/Reveal';
 import {PromoProps} from '../schema';
 import {colors, fonts, gradients} from '../theme';
 
-export const JOURNEY_DURATION = 210;
+export const JOURNEY_DURATION = 240;
 
 const WORDS = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve'];
 const MILESTONES = ['Planning', 'Teamwork', 'Preparation', 'Refinement'];
@@ -62,7 +62,7 @@ export const Journey: React.FC<PromoProps> = ({monthsOfWork, eventTitle}) => {
 		easing: Easing.bezier(0.22, 1, 0.36, 1),
 	});
 	const ringIn = spring({frame: frame - 6, fps, config: {damping: 16}});
-	const track = interpolate(frame, [60, 175], [0, 1], {
+	const track = interpolate(frame, [60, 200], [0, 1], {
 		extrapolateLeft: 'clamp',
 		extrapolateRight: 'clamp',
 		easing: Easing.inOut(Easing.cubic),
@@ -193,7 +193,7 @@ export const Journey: React.FC<PromoProps> = ({monthsOfWork, eventTitle}) => {
 					const at = i / (steps.length - 1);
 					const reached = track >= at - 0.001;
 					const pop = spring({
-						frame: frame - (60 + at * 115),
+						frame: frame - (60 + at * 140),
 						fps,
 						config: {damping: 10, stiffness: 160},
 					});

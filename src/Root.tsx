@@ -1,7 +1,8 @@
 import React from 'react';
 import {Composition} from 'remotion';
 import './fonts';
-import {PROMO_DURATION, QualityDayPromo} from './QualityDayPromo';
+import {QualityDayPromo} from './QualityDayPromo';
+import {PROMO_DURATION} from './timeline';
 import {defaultPromoProps, promoSchema} from './schema';
 
 export const RemotionRoot: React.FC = () => {

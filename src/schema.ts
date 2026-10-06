@@ -26,6 +26,6 @@ export const defaultPromoProps: PromoProps = {
 	sponsorTitle: 'Patron of the Ceremony',
 	monthsOfWork: 2,
 	tagline: 'Quality is a Journey of Excellence',
-	// Drop an audio file into public/ (e.g. "music.mp3") and set its name here.
+	// Leave empty for the built-in music bed, or set a file in public/ (e.g. "music.mp3") to replace it.
 	musicFile: '',
 };

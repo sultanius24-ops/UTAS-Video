@@ -1,20 +1,39 @@
 # UTAS Quality Day 2026 — Promo Video
 
-A ~36 second (1920×1080, 30 fps) promo video built with [Remotion](https://www.remotion.dev).
+A 40 second (1920×1080, 30 fps) promo video with a male voice-over, sound design and music, built with [Remotion](https://www.remotion.dev).
 It's meant to open the Quality Day inauguration ceremony in front of the Event Sponsor.
 
 The latest render is in [`renders/quality-day-promo.mp4`](renders/quality-day-promo.mp4).
 
 ## Storyboard
 
-| # | Scene | Time | What happens |
-|---|-------|------|--------------|
-| 1 | Opening | 0–5s | The logo's four bars rise, then the university name appears in Arabic and English. "Proudly Presents" |
-| 2 | Title | 4–10s | Campus photo with a slow push-in. **QUALITY DAY** drops in letter by letter with يوم الجودة, and satin wave ribbons |
-| 3 | The Journey | 10–16s | A **60 days** counter ring, "Two Months in the Making", key stats and an animated 8-week timeline |
-| 4 | Our Commitment | 16–22s | A diagonal split reveals the second campus photo, with the values Excellence, Innovation and Continuous Improvement |
-| 5 | Inauguration | 21–28s | Golden light rays and "Under the Patronage of / تحت رعاية" with the Event Sponsor's name in an animated frame |
-| 6 | Logo finale | 27–36s | Light flash, swoosh arcs that draw the new logo in, a particle burst, a shine sweep, then the title, university name and tagline |
+| # | Scene | Time | Voice-over |
+|---|-------|------|------------|
+| 1 | Opening: logo bars rise, university name | 0–6s | "The University of Technology and Applied Sciences... proudly presents." |
+| 2 | Title: **QUALITY DAY** over the campus photo, wave ribbons | 5–11s | "Quality Day... twenty twenty-six." |
+| 3 | The Journey: 60-day counter, 8-week timeline | 11–19s | "Two months in the making. Sixty days of planning, teamwork, and dedication... all leading to this moment." |
+| 4 | Our Commitment: split-screen photo, values | 18–25s | "Building a culture of quality... through excellence, innovation, and continuous improvement." |
+| 5 | Inauguration: Under the Patronage of the Event Sponsor | 24–32s | "Under the patronage of our distinguished event sponsor... we welcome you to the inauguration of Quality Day." |
+| 6 | Logo finale: flash, swooshes, logo hit, shine | 31–40s | "Quality Day, twenty twenty-six. Because quality... is a journey of excellence." |
+
+## Audio
+
+Everything is generated locally, so there are no licensing issues:
+
+- **Voice-over**: the male voice `am_michael` from [Kokoro](https://github.com/thewh1teagle/kokoro-onnx), an open neural TTS model. The lines live in `voiceover/script.json`. The generator writes `public/audio/vo/*.wav` and `src/audio/voiceover.json` (frame placement and length).
+- **Sound effects**: whooshes on every transition, cinematic hits on the title and logo, pops on the bars and values, counter ticks, milestone blips, shimmers, and a riser into the logo reveal. They are synthesised by `scripts/generate_audio.py`. The cue sheet is in `src/audio/Soundtrack.tsx`.
+- **Music bed**: a synthesised cinematic pad in D major, with a pulse under the Journey and Values scenes. It resolves on the logo hit and dips automatically under the voice-over.
+- **Master**: `scripts/master.mjs` normalises the final mix to -16 LUFS with a -1.5 dBTP ceiling.
+
+To change the narration (for example, to say the sponsor's name), edit `voiceover/script.json` and regenerate:
+
+```bash
+pip install kokoro-onnx soundfile numpy scipy
+# model files: https://github.com/thewh1teagle/kokoro-onnx/releases/tag/model-files-v1.0
+python scripts/generate_voiceover.py kokoro-v1.0.onnx voices-v1.0.bin
+```
+
+If a line ends up longer than its scene, lengthen the scene (`*_DURATION` in `src/scenes/`), move the line's `from`, and update `src/audio/timing.json`. Then re-run `python scripts/generate_audio.py` so the music bed follows. Studio logs a warning if `timing.json` is out of date.
 
 ## Customise
 
@@ -22,14 +41,14 @@ All text is in `src/schema.ts` (`defaultPromoProps`). You can also edit it live 
 
 - `sponsorName` / `sponsorTitle`: **put the patron's real name and title here before the ceremony.**
 - `monthsOfWork`: drives the days counter, the weeks stat and the "Two Months" headline.
-- `musicFile`: put an audio file in `public/` (e.g. `music.mp3`) and set `musicFile: 'music.mp3'`. It fades in and out automatically.
+- `musicFile`: leave empty for the built-in music bed, or set a file in `public/` (e.g. `music.mp3`) to replace it. Ducking under the voice-over still applies.
 
 ## Commands
 
 ```bash
 npm install
 npm run studio   # live preview and editing
-npm run render   # writes out/quality-day-promo.mp4
+npm run render   # renders and masters out/quality-day-promo.mp4
 ```
 
 ## Assets

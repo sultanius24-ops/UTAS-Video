@@ -7,7 +7,7 @@ import {MaskReveal} from '../components/Reveal';
 import {PromoProps} from '../schema';
 import {colors, fonts, gradients} from '../theme';
 
-export const VALUES_DURATION = 180;
+export const VALUES_DURATION = 200;
 
 const Icon: React.FC<{kind: 'star' | 'bulb' | 'cycle'}> = ({kind}) => {
 	const common = {stroke: 'white', strokeWidth: 2.4, fill: 'none', strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const};
@@ -31,6 +31,9 @@ const Icon: React.FC<{kind: 'star' | 'bulb' | 'cycle'}> = ({kind}) => {
 		</svg>
 	);
 };
+
+// Scene frames where each value appears, matched to the narration.
+export const VALUE_CUES = [96, 124, 152];
 
 const VALUES: {label: string; icon: 'star' | 'bulb' | 'cycle'}[] = [
 	{label: 'Excellence', icon: 'star'},
@@ -99,7 +102,7 @@ export const Values: React.FC<PromoProps> = () => {
 				</MaskReveal>
 				<div style={{display: 'flex', flexDirection: 'column', gap: 20, marginTop: 50}}>
 					{VALUES.map((v, i) => {
-						const p = spring({frame: frame - 52 - i * 12, fps, config: {damping: 15}});
+						const p = spring({frame: frame - VALUE_CUES[i], fps, config: {damping: 15}});
 						return (
 							<div
 								key={v.label}

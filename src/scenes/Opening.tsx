@@ -7,13 +7,13 @@ import {Streaks} from '../components/LightSweep';
 import {PromoProps} from '../schema';
 import {colors, fonts, gradients} from '../theme';
 
-export const OPENING_DURATION = 150;
+export const OPENING_DURATION = 180;
 
 export const Opening: React.FC<PromoProps> = ({universityName, universityNameAr}) => {
 	const frame = useCurrentFrame();
 	const {fps} = useVideoConfig();
 	const drift = interpolate(frame, [0, OPENING_DURATION], [1, 1.06]);
-	const tracking = interpolate(frame, [70, 130], [0.2, 0.62], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+	const tracking = interpolate(frame, [112, 175], [0.2, 0.62], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
 	const glow = spring({frame: frame - 6, fps, config: {damping: 30}});
 
 	return (
@@ -69,7 +69,7 @@ export const Opening: React.FC<PromoProps> = ({universityName, universityNameAr}
 					</div>
 				</MaskReveal>
 				<div style={{margin: '34px 0 26px'}}>
-					<AccentLine delay={58} width={420} height={4} background={gradients.orangeText} align="center" />
+					<AccentLine delay={100} width={420} height={4} background={gradients.orangeText} align="center" />
 				</div>
 				<div
 					style={{
@@ -78,7 +78,7 @@ export const Opening: React.FC<PromoProps> = ({universityName, universityNameAr}
 						fontSize: 30,
 						letterSpacing: `${tracking}em`,
 						color: colors.amber,
-						opacity: interpolate(frame, [70, 90], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}),
+						opacity: interpolate(frame, [112, 130], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}),
 						textTransform: 'uppercase',
 						marginRight: `-${tracking}em`,
 					}}

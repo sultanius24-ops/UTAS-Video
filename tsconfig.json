@@ -8,6 +8,7 @@
     "noEmit": true,
     "lib": ["DOM", "ES2022"],
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "noUnusedLocals": true

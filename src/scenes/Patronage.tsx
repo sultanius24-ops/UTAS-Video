@@ -5,7 +5,7 @@ import {AccentLine, MaskReveal} from '../components/Reveal';
 import {PromoProps} from '../schema';
 import {colors, fonts, gradients} from '../theme';
 
-export const PATRONAGE_DURATION = 195;
+export const PATRONAGE_DURATION = 240;
 
 // Rotating golden light rays behind the patron's name.
 const Rays: React.FC = () => {
