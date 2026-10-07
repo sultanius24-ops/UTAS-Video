@@ -3,7 +3,7 @@ import {AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig} from
 import {Backdrop} from '../components/Backdrop';
 import {MaskReveal} from '../components/Reveal';
 import {PromoProps} from '../schema';
-import {colors, fonts, gradients} from '../theme';
+import {colors, fonts} from '../theme';
 
 export const COUNT_FROM = 10;
 export const STEP = 30; // one number per second
@@ -21,7 +21,10 @@ const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 
 export const Countdown: React.FC<PromoProps> = ({kicker, kickerAr, eventTitle, year}) => {
 	const frame = useCurrentFrame();
-	const {fps} = useVideoConfig();
+	const {fps, width, height} = useVideoConfig();
+	const vertical = height > width;
+	// Titles sit just above and below the ring in portrait; at the frame edges in landscape.
+	const edge = vertical ? height / 2 - RING / 2 - 230 : 70;
 
 	const t = frame - INTRO;
 	const idx = Math.min(COUNT_FROM - 1, Math.max(0, Math.floor(t / STEP)));
@@ -49,6 +52,9 @@ export const Countdown: React.FC<PromoProps> = ({kicker, kickerAr, eventTitle, y
 	const camera = 1 + 0.08 * stretch + 0.015 * Math.exp(-local / 5) * (started ? 1 : 0);
 	const textIn = interpolate(frame, [4, 26], [0, 1], clamp);
 	const textOut = interpolate(frame, [COUNTDOWN_END - 10, COUNTDOWN_END + 6], [1, 0], clamp);
+	// After "1" the ring rushes outwards into the white flash.
+	const warp = interpolate(frame, [COUNTDOWN_END - 4, COUNTDOWN_END + 18], [0, 1], {...clamp, easing: (x) => x * x});
+	const ringOpacity = ringIn * (1 - warp * 0.6);
 
 	return (
 		<AbsoluteFill>
@@ -68,8 +74,8 @@ export const Countdown: React.FC<PromoProps> = ({kicker, kickerAr, eventTitle, y
 						top: '50%',
 						width: RING,
 						height: RING,
-						transform: `translate(-50%, -50%) scale(${0.8 + 0.2 * ringIn}) rotate(${(1 - ringIn) * -90}deg)`,
-						opacity: ringIn * textOut,
+						transform: `translate(-50%, -50%) scale(${(0.8 + 0.2 * ringIn) * (1 + warp * 2.6)}) rotate(${(1 - ringIn) * -90 + warp * 40}deg)`,
+						opacity: ringOpacity,
 					}}
 				>
 					<svg width={RING} height={RING} style={{position: 'absolute', inset: 0, overflow: 'visible'}}>
@@ -128,41 +134,45 @@ export const Countdown: React.FC<PromoProps> = ({kicker, kickerAr, eventTitle, y
 							);
 						})}
 					</svg>
-					{/* The number */}
+					{/* The number: SVG text with a gradient fill (CSS background-clip text breaks under filters in Chromium) */}
 					<div
 						style={{
 							position: 'absolute',
 							inset: 0,
-							display: 'flex',
-							alignItems: 'center',
-							justifyContent: 'center',
-							fontFamily: fonts.display,
-							fontWeight: 900,
-							fontSize: n >= 10 ? 300 : 360,
-							lineHeight: 1,
-							letterSpacing: '-0.02em',
-							fontVariantNumeric: 'tabular-nums',
 							transform: `scale(${numScale})`,
 							filter: `blur(${numBlur}px) drop-shadow(0 0 40px ${final ? 'rgba(247,132,30,0.55)' : 'rgba(61,139,255,0.45)'})`,
 							opacity: numOpacity,
 						}}
 					>
-						<span
-							style={{
-								background: final ? gradients.orangeText : `linear-gradient(180deg, ${colors.white} 0%, ${colors.ice} 100%)`,
-								WebkitBackgroundClip: 'text',
-								backgroundClip: 'text',
-								color: 'transparent',
-								paddingBottom: 20,
-							}}
-						>
-							{n}
-						</span>
+						<svg width={RING} height={RING} style={{position: 'absolute', inset: 0, overflow: 'visible'}}>
+							<defs>
+								<linearGradient id="cd-num" x1="0" y1="0" x2={final ? 1 : 0} y2={final ? 0 : 1}>
+									<stop offset="0%" stopColor={final ? colors.amber : colors.white} />
+									<stop offset="100%" stopColor={final ? colors.orange : colors.ice} />
+								</linearGradient>
+							</defs>
+							<text
+								x={RING / 2}
+								y={RING / 2}
+								textAnchor="middle"
+								dominantBaseline="central"
+								fill="url(#cd-num)"
+								style={{
+									fontFamily: fonts.display,
+									fontWeight: 900,
+									fontSize: n >= 10 ? 300 : 360,
+									letterSpacing: '-0.02em',
+									fontVariantNumeric: 'tabular-nums',
+								}}
+							>
+								{n}
+							</text>
+						</svg>
 					</div>
 				</div>
 
 				{/* Titles */}
-				<AbsoluteFill style={{alignItems: 'center', paddingTop: 70, opacity: textIn * textOut}}>
+				<AbsoluteFill style={{alignItems: 'center', paddingTop: edge, opacity: textIn * textOut}}>
 					<MaskReveal delay={6}>
 						<div
 							style={{
@@ -185,7 +195,7 @@ export const Countdown: React.FC<PromoProps> = ({kicker, kickerAr, eventTitle, y
 						</div>
 					</MaskReveal>
 				</AbsoluteFill>
-				<AbsoluteFill style={{alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 80, opacity: textIn * textOut}}>
+				<AbsoluteFill style={{alignItems: 'center', justifyContent: 'flex-end', paddingBottom: vertical ? edge + 60 : 80, opacity: textIn * textOut}}>
 					<MaskReveal delay={16}>
 						<div
 							style={{

@@ -1,5 +1,6 @@
 import React from 'react';
 import {interpolate, useCurrentFrame, useVideoConfig} from 'remotion';
+import {phase} from '../loop';
 import {colors} from '../theme';
 
 type RibbonSpec = {
@@ -14,15 +15,15 @@ type RibbonSpec = {
 	opacity: number;
 };
 
-const ribbonPath = (spec: RibbonSpec, t: number, width: number) => {
+const ribbonPath = (spec: RibbonSpec, flow: number, twistPhase: number, width: number) => {
 	const top: string[] = [];
 	const bottom: string[] = [];
 	const step = 24;
 	for (let x = -40; x <= width + 40; x += step) {
 		const k = x / width;
-		const center = spec.base + Math.sin(k * Math.PI * 2 * spec.freq + t * spec.speed + spec.phase) * spec.amp;
+		const center = spec.base + Math.sin(k * Math.PI * 2 * spec.freq + flow + spec.phase) * spec.amp;
 		// The thickness breathes along the ribbon so it reads like a twisting satin band.
-		const twist = Math.abs(Math.sin(k * Math.PI * 1.6 + t * 0.6 + spec.phase));
+		const twist = Math.abs(Math.sin(k * Math.PI * 1.6 + twistPhase + spec.phase));
 		const half = (spec.thickness * (0.25 + 0.75 * twist)) / 2;
 		top.push(`${x},${center - half}`);
 		bottom.unshift(`${x},${center + half}`);
@@ -31,15 +32,15 @@ const ribbonPath = (spec: RibbonSpec, t: number, width: number) => {
 };
 
 // Flowing blue/orange satin ribbons echoing the wave at the base of the logo.
-export const WaveRibbons: React.FC<{y?: number; scale?: number; reveal?: number; light?: boolean}> = ({
+export const WaveRibbons: React.FC<{y?: number; scale?: number; reveal?: number; light?: boolean; loop?: number}> = ({
 	y = 0,
 	scale = 1,
 	reveal = 0,
 	light = false,
+	loop,
 }) => {
 	const frame = useCurrentFrame();
 	const {width, height} = useVideoConfig();
-	const t = frame / 30;
 	const progress = interpolate(frame, [reveal, reveal + 30], [0, 1], {
 		extrapolateLeft: 'clamp',
 		extrapolateRight: 'clamp',
@@ -103,7 +104,7 @@ export const WaveRibbons: React.FC<{y?: number; scale?: number; reveal?: number;
 				))}
 			</defs>
 			{specs.map((s) => (
-				<path key={s.id} d={ribbonPath(s, t, width)} fill={`url(#rib-${s.id})`} opacity={s.opacity} />
+				<path key={s.id} d={ribbonPath(s, phase(frame, s.speed, loop), phase(frame, 0.6, loop), width)} fill={`url(#rib-${s.id})`} opacity={s.opacity} />
 			))}
 		</svg>
 	);

@@ -5,10 +5,11 @@
   "description": "UTAS Quality Day new logo countdown, built with Remotion",
   "scripts": {
     "studio": "remotion studio",
-    "render": "remotion render QualityDayPromo out/raw.mp4 --audio-codec=aac --audio-bitrate=320k && node scripts/master.mjs out/raw.mp4 out/quality-day-promo.mp4",
-    "still": "remotion still QualityDayPromo out/poster.png --frame=560",
+    "render": "node scripts/render-all.mjs",
+    "still": "remotion still LogoLoop renders/logo-screen.png --frame=0",
     "typecheck": "tsc --noEmit",
-    "generate:audio": "python scripts/generate_audio.py"
+    "generate:audio": "python scripts/generate_audio.py",
+    "split:logo": "python scripts/split_logo.py"
   },
   "dependencies": {
     "@remotion/cli": "4.0.533",

@@ -1,6 +1,6 @@
 import React from 'react';
 import {Audio, interpolate, Sequence, staticFile, useVideoConfig} from 'remotion';
-import {COUNTDOWN_END, FINAL_STRETCH, FINALE_START, LOGO_HIT, PROMO_DURATION, STEP, TICKS} from '../timeline';
+import {BUILD, COUNTDOWN_END, FINAL_STRETCH, FINALE_START, FLASH_PEAK, LOGO_COMPLETE, PROMO_DURATION, STEP, TICKS} from '../timeline';
 import {PromoProps} from '../schema';
 import timing from './timing.json';
 
@@ -14,21 +14,27 @@ const CUES: Cue[] = [
 		{sfx: n <= FINAL_STRETCH ? 'count-hit-final' : 'count-hit', at, volume: n <= FINAL_STRETCH ? 0.7 : 0.5},
 		...(n > 1 ? [{sfx: 'tock', at: at + STEP / 2, volume: n <= FINAL_STRETCH ? 0.28 : 0.18}] : []),
 	]),
-	// Riser lands exactly on the logo hit; whoosh as the flash swallows the countdown.
-	{sfx: 'riser-long', at: LOGO_HIT - 78, volume: 0.5},
-	{sfx: 'whoosh-reverse', at: FINALE_START - 4, volume: 0.35},
-	{sfx: 'impact-big', at: LOGO_HIT - 1, volume: 0.8},
-	{sfx: 'shimmer', at: LOGO_HIT, volume: 0.45},
-	{sfx: 'whoosh-soft', at: LOGO_HIT + 20, volume: 0.3},
-	{sfx: 'sparkle', at: LOGO_HIT + 40, volume: 0.4},
-	{sfx: 'shimmer-soft', at: LOGO_HIT + 74, volume: 0.25},
+	// Riser peaks on the flash, where the music resolves with a cinematic hit.
+	{sfx: 'riser-long', at: FLASH_PEAK - 78, volume: 0.5},
+	{sfx: 'whoosh-reverse', at: FINALE_START - 8, volume: 0.35},
+	{sfx: 'impact-big', at: FLASH_PEAK - 1, volume: 0.75},
+	// The logo builds: ring swish, a rising note per bar, wave sweep, building shimmer.
+	{sfx: 'whoosh-soft', at: FINALE_START + BUILD.ring[0] - 2, volume: 0.35},
+	...BUILD.bars.map((start, i) => ({sfx: `pop-${i + 1}`, at: FINALE_START + start + 7, volume: 0.32})),
+	{sfx: 'whoosh-soft', at: FINALE_START + BUILD.wave[0] - 6, volume: 0.3},
+	{sfx: 'shimmer-soft', at: FINALE_START + BUILD.building[0], volume: 0.3},
+	// Logo complete
+	{sfx: 'impact-soft', at: LOGO_COMPLETE - 1, volume: 0.55},
+	{sfx: 'shimmer', at: LOGO_COMPLETE, volume: 0.45},
+	{sfx: 'sparkle', at: LOGO_COMPLETE + 12, volume: 0.4},
+	{sfx: 'shimmer-soft', at: LOGO_COMPLETE + 64, volume: 0.22},
 ];
 
 // Mix levels leave headroom; scripts/master.mjs brings the final file up to broadcast loudness.
 const SFX_LEVEL = 0.75;
 const MUSIC_LEVEL = 0.4;
 
-if (timing.total_frames !== PROMO_DURATION || timing.logo_hit !== LOGO_HIT || timing.countdown_end !== COUNTDOWN_END) {
+if (timing.total_frames !== PROMO_DURATION || timing.logo_hit !== FLASH_PEAK || timing.countdown_end !== COUNTDOWN_END) {
 	console.warn('src/audio/timing.json is out of date with the scene timings: re-run scripts/generate_audio.py');
 }
 

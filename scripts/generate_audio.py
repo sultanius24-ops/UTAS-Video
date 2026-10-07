@@ -61,6 +61,11 @@ def svf_bandpass(x, fc, q=2.0):
     return out
 
 
+def fit(x, n):
+    """Trim or zero-pad a mono signal to exactly n samples."""
+    return x[:n] if len(x) >= n else np.pad(x, (0, n - len(x)))
+
+
 def stereo(mono, pan=0.0):
     """Equal-power pan; pan may be a scalar or per-sample array in [-1, 1]."""
     a = (np.asarray(pan) + 1) * np.pi / 4
@@ -142,7 +147,7 @@ def shimmer(dur=2.6, count=22, spread=0.7, base=74):
     for i in range(count):
         note = base + 12 * rng.integers(0, 3) + scale[rng.integers(0, 5)]
         onset = int(rng.uniform(0, spread) * SR)
-        tone = bell(midi(note), dur=dur - onset / SR, decay=rng.uniform(0.4, 0.9), bright=0.6)
+        tone = fit(bell(midi(note), dur=dur - onset / SR, decay=rng.uniform(0.4, 0.9), bright=0.6), n - onset)
         out[onset:] += stereo(tone, rng.uniform(-0.9, 0.9)) * rng.uniform(0.3, 1.0)
     return reverb(hp(out, 900), seconds=3.2, wet=0.55, tone=9000)
 
@@ -152,8 +157,17 @@ def sparkle(dur=1.8, notes=(86, 90, 93, 98, 102)):
     out = np.zeros((n, 2))
     for i, note in enumerate(notes):
         onset = int(i * 0.06 * SR)
-        out[onset:] += stereo(bell(midi(note), dur=dur - onset / SR, decay=0.35, bright=0.8), -0.6 + i * 0.3)
+        out[onset:] += stereo(fit(bell(midi(note), dur=dur - onset / SR, decay=0.35, bright=0.8), n - onset), -0.6 + i * 0.3)
     return reverb(hp(out, 1500), seconds=2.5, wet=0.5, tone=10000)
+
+
+def pop(note, dur=0.5):
+    t = t_axis(dur)
+    f = midi(note) * (1 + 0.6 * np.exp(-t / 0.012))
+    x = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t / 0.085)
+    x += 0.25 * np.sin(2 * np.pi * np.cumsum(2 * f) / SR) * np.exp(-t / 0.04)
+    x += hp(noise(len(t)), 3000) * np.exp(-t / 0.004) * 0.15
+    return reverb(x, seconds=1.0, wet=0.25)
 
 
 def riser(dur=2.5, f_lo=300, f_hi=7000, tone=True):
@@ -273,6 +287,9 @@ if __name__ == "__main__":
     write("whoosh-soft", whoosh(0.9, 0.45, 600, 6000, -0.4, 0.4, body=0.3))
     write("whoosh-reverse", whoosh(1.0, 0.45, 400, 5200, 0.8, -0.8))
     write("impact-big", impact(3.4, big=True))
+    write("impact-soft", impact(2.2, big=False))
+    for i, note in enumerate([74, 78, 81, 86]):
+        write(f"pop-{i + 1}", pop(note))
     write("shimmer", shimmer())
     write("shimmer-soft", shimmer(2.0, count=10, spread=0.4, base=79))
     write("sparkle", sparkle())

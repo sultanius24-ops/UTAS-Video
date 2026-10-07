@@ -8,6 +8,8 @@ export const promoSchema = z.object({
 	year: z.string(),
 	universityName: z.string(),
 	tagline: z.string(),
+	standbyNote: z.string(),
+	standbyNoteAr: z.string(),
 	musicFile: z.string(),
 });
 
@@ -21,6 +23,8 @@ export const defaultPromoProps: PromoProps = {
 	year: '2026',
 	universityName: 'University of Technology and Applied Sciences',
 	tagline: 'Quality is a Journey of Excellence',
+	standbyNote: 'The ceremony will begin shortly',
+	standbyNoteAr: 'يبدأ الحفل بعد قليل',
 	// Leave empty for the built-in music bed, or set a file in public/ (e.g. "music.mp3") to replace it.
 	musicFile: '',
 };
