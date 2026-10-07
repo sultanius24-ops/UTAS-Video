@@ -1,5 +1,12 @@
 {
-  "total_frames": 660,
-  "countdown_end": 330,
-  "logo_hit": 342
+  "music-bed.wav": {
+    "total_frames": 660,
+    "countdown_end": 330,
+    "logo_hit": 342
+  },
+  "music-bed-particles.wav": {
+    "total_frames": 750,
+    "countdown_end": 372,
+    "logo_hit": 372
+  }
 }

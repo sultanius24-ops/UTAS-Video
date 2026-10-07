@@ -170,6 +170,37 @@ def pop(note, dur=0.5):
     return reverb(x, seconds=1.0, wet=0.25)
 
 
+def swarm(dur=0.8):
+    """Airy flutter of many tiny points moving together."""
+    t = t_axis(dur)
+    p = t / dur
+    env = np.sin(np.pi * p) ** 1.5
+    air = svf_bandpass(pink(len(t)), 2200 + 3500 * np.sin(np.pi * p), q=1.8) * env * 0.6
+    out = stereo(air, 0.5 * np.sin(2 * np.pi * p))
+    for _ in range(14):
+        onset = int(rng.uniform(0.05, 0.6) * dur * SR)
+        g = fit(bell(midi(rng.choice([86, 88, 90, 93, 95, 98])), dur=0.25, decay=0.05, bright=0.3), len(t) - onset)
+        out[onset:] += stereo(g * 0.25, rng.uniform(-0.8, 0.8))
+    return reverb(hp(out, 600), seconds=1.2, wet=0.3, tone=9000)
+
+
+def assemble(dur=2.8, grains=90):
+    """Crystalline cascade that rises and thickens as the points settle into the logo."""
+    n = int(dur * SR)
+    out = np.zeros((n, 2))
+    scale = [0, 2, 4, 7, 9]
+    for i in range(grains):
+        p = (i / grains) ** 0.7
+        onset = int(p * (dur - 0.6) * SR)
+        note = 74 + 12 * int(p * 2.4) + scale[rng.integers(0, 5)]
+        g = fit(bell(midi(note), dur=0.6, decay=0.09, bright=0.5), n - onset)
+        out[onset:] += stereo(g * (0.2 + 0.5 * p), rng.uniform(-0.9, 0.9))
+    t = t_axis(dur)
+    swell = svf_bandpass(pink(len(t)), 1500 + 5000 * (t / dur), q=1.5) * (t / dur) ** 2 * np.clip((dur - t) / 0.4, 0, 1)
+    out += stereo(swell * 0.35)
+    return reverb(hp(out, 500), seconds=2.6, wet=0.4, tone=10000)
+
+
 def riser(dur=2.5, f_lo=300, f_hi=7000, tone=True):
     t = t_axis(dur)
     p = t / dur
@@ -211,7 +242,7 @@ def saw(freq, t, harmonics=14):
     return sum(np.sin(2 * np.pi * freq * k * t) / k for k in range(1, harmonics + 1))
 
 
-def music_bed(total_frames, countdown_end, logo_hit, **_):
+def music_bed(out_name, total_frames, countdown_end, logo_hit, **_):
     """Suspense drone that tightens through the countdown, a breath of silence, then a bright resolve."""
     dur = total_frames / FPS + 0.5
     n = int(dur * SR)
@@ -272,9 +303,9 @@ def music_bed(total_frames, countdown_end, logo_hit, **_):
     mix[: int(0.3 * SR)] *= np.linspace(0, 1, int(0.3 * SR))[:, None]
     mix = np.tanh(mix / (np.max(np.abs(mix)) or 1) * 1.2)
     mix = (mix / np.max(np.abs(mix)) * 0.85).astype(np.float32)
-    path = ROOT / "public/audio/music-bed.wav"
+    path = ROOT / "public/audio" / out_name
     sf.write(path, mix, SR, subtype="PCM_16")
-    print(f"music-bed.wav  {len(mix) / SR:.2f}s")
+    print(f"{out_name}  {len(mix) / SR:.2f}s")
 
 
 if __name__ == "__main__":
@@ -294,4 +325,9 @@ if __name__ == "__main__":
     write("shimmer-soft", shimmer(2.0, count=10, spread=0.4, base=79))
     write("sparkle", sparkle())
     write("riser-long", riser(2.6))
-    music_bed(**timing)
+    write("whoosh-big", whoosh(1.2, 0.5, 220, 4800))
+    write("swarm", swarm())
+    write("assemble", assemble())
+    # One music bed per video, each timed by its entry in timing.json.
+    for out_name, bed in timing.items():
+        music_bed(out_name, **bed)

@@ -1,20 +1,38 @@
-# UTAS Quality Day 2026: New Logo Unveiling Package
+# UTAS Quality Day 2026: New Logo Unveiling
 
-Videos for unveiling the new Quality Day logo at the inauguration ceremony, built with [Remotion](https://www.remotion.dev). All renders are in [`renders/`](renders/).
+Videos for unveiling the new Quality Day logo at the inauguration ceremony, built with [Remotion](https://www.remotion.dev).
 
-## Ceremony running order
+## Current concept: "Every Point Counts" (كل نقطة تصنع الجودة)
 
-| # | File | Length | Use |
-|---|------|--------|-----|
-| 1 | `1-standby-loop.mp4` | 20s loop | On screen before the unveiling. Set the player to **repeat**. Silent |
-| 2 | `2-countdown-logo-reveal.mp4` | 22s | Play when the patron starts the unveiling: countdown 10 → 1, then the logo builds itself. With sound |
-| 3 | `3-logo-hold-loop.mp4` | 20s loop | Switch to this right after #2 ends to keep the logo on screen. Set to **repeat**. Silent |
-| – | `social-vertical-9x16.mp4` | 22s | Vertical cut of #2 for Instagram Reels, Stories and WhatsApp status |
-| – | `logo-screen.png` | still | Logo screen image for slides, the website or a fallback |
+The whole video is made of **6,000 points of light**. Each one stands for a contribution: a person, an effort, a day of the two months of work.
 
-The background motion in #2 runs on the same clock as #3, so #2's last frame flows straight into #3's first and the switch is invisible. Both loops repeat seamlessly; the jump at the loop point measures the same as a normal frame-to-frame change.
+| Time | What happens |
+|------|--------------|
+| 0–2s | Points drift scattered across a night sky. "60 days · countless contributions / ٦٠ يومًا من العمل… وإسهامات لا تُحصى" |
+| 2–12s | The points swarm together to form each number, **10 → 1**, regrouping every second. 3-2-1 glow orange |
+| 12–13s | The "1" bursts outward and dawn floods the screen |
+| 13–15s | The points fly back and settle left to right into the **new logo**, each taking its real colour |
+| 15–25s | The crisp logo resolves out of the points, then QUALITY DAY 2026, يوم الجودة, the university name and **"Quality is Everyone's Responsibility · الجودة مسؤولية الجميع"** |
 
-## What happens in the reveal
+Files in [`renders/`](renders/):
+- `every-point-counts.mp4`: 1920×1080, 25s, with sound.
+- `every-point-counts-vertical-9x16.mp4`: for Instagram Reels, Stories and WhatsApp status.
+- `logo-screen.png`: the final frame, for slides or a fallback.
+
+How it works: the digits are sampled from the real Montserrat glyphs and the logo from its image (`src/particles/targets.ts`), with a seeded random generator so every render is identical. Points are matched between shapes along a Hilbert curve, so each morph flows coherently instead of scrambling. Timing lives in `src/particles/timing.ts`.
+
+Sound (`src/audio/ParticleSoundtrack.tsx`):
+- A flutter each time the points regroup and a beat as each number locks in.
+- A riser into the burst, then a cinematic hit as the music resolves.
+- A crystalline cascade as the points become the logo, and a shimmer and sparkle on the reveal.
+
+All of it is synthesised by `scripts/generate_audio.py` and mastered to -16 LUFS.
+
+## Previous concept
+
+The ring countdown with the logo building from its parts, plus standby and hold loops, is still available. It's in Studio under **Previous-concept**, and its renders are in `renders/previous/`. Re-render it with `node scripts/render-all.mjs --only=CountdownReveal,Standby,LogoLoop,CountdownRevealVertical`.
+
+### Previous concept: what happens in the reveal
 
 1. **Countdown (0–11s):** One number per second inside a ring that sweeps each second, with a pulse on every beat. **3 · 2 · 1** turn orange with a warm glow and a slow zoom.
 2. **Flash (11–12s):** After "1" the ring rushes outward into a white flash.
@@ -23,7 +41,7 @@ The background motion in #2 runs on the same clock as #3, so #2's last frame flo
 
 The build uses `public/images/logo-layers/`: the logo cut into parts by `scripts/split_logo.py`. Every pixel belongs to exactly one layer, so the assembled logo is identical to the original.
 
-## Audio (reveal videos only)
+### Previous concept: audio
 
 All sound is synthesised by `scripts/generate_audio.py`, so it's royalty-free:
 
@@ -34,7 +52,7 @@ All sound is synthesised by `scripts/generate_audio.py`, so it's royalty-free:
 
 ## Customise
 
-- Text (kicker, title, year, university name, tagline, standby note): `src/schema.ts`. You can also edit it live in Remotion Studio's props panel.
+- Text (kicker, intro line, title, year, university name, tagline, standby note): `src/schema.ts`. You can also edit it live in Remotion Studio's props panel.
 - Countdown length: `COUNT_FROM` in `src/scenes/Countdown.tsx`. Then update `src/audio/timing.json` (Studio warns if it's stale) and re-run `python scripts/generate_audio.py`.
 - Logo build timing: `BUILD` in `src/components/LogoBuild.tsx`. The sound cues follow automatically.
 - `musicFile`: set a file in `public/` to replace the built-in music bed.
@@ -44,8 +62,8 @@ All sound is synthesised by `scripts/generate_audio.py`, so it's royalty-free:
 ```bash
 npm install
 npm run studio                    # live preview and editing
-npm run render                    # render the whole package into renders/
-node scripts/render-all.mjs --only=CountdownReveal   # one composition only
+npm run render                    # render the current concept into renders/
+node scripts/render-all.mjs --only=EveryPointCounts   # one composition only
 pip install numpy scipy soundfile pillow
 npm run generate:audio            # rebuild SFX and music
 npm run split:logo                # rebuild logo layers after changing the logo

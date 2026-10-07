@@ -34,7 +34,8 @@ const CUES: Cue[] = [
 const SFX_LEVEL = 0.75;
 const MUSIC_LEVEL = 0.4;
 
-if (timing.total_frames !== PROMO_DURATION || timing.logo_hit !== FLASH_PEAK || timing.countdown_end !== COUNTDOWN_END) {
+const bed = timing['music-bed.wav'];
+if (bed.total_frames !== PROMO_DURATION || bed.logo_hit !== FLASH_PEAK || bed.countdown_end !== COUNTDOWN_END) {
 	console.warn('src/audio/timing.json is out of date with the scene timings: re-run scripts/generate_audio.py');
 }
 

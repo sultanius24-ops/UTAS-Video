@@ -14,17 +14,21 @@ mkdirSync(OUT, {recursive: true});
 mkdirSync(TMP, {recursive: true});
 
 const JOBS = [
-	{id: 'Standby', file: '1-standby-loop.mp4', audio: false},
-	{id: 'CountdownReveal', file: '2-countdown-logo-reveal.mp4', audio: true},
-	{id: 'LogoLoop', file: '3-logo-hold-loop.mp4', audio: false},
-	{id: 'CountdownRevealVertical', file: 'social-vertical-9x16.mp4', audio: true},
+	{id: 'EveryPointCounts', file: 'every-point-counts.mp4', audio: true},
+	{id: 'EveryPointCountsVertical', file: 'every-point-counts-vertical-9x16.mp4', audio: true},
+	// Previous concept (render with --only=...):
+	{id: 'Standby', file: 'previous/1-standby-loop.mp4', audio: false, previous: true},
+	{id: 'CountdownReveal', file: 'previous/2-countdown-logo-reveal.mp4', audio: true, previous: true},
+	{id: 'LogoLoop', file: 'previous/3-logo-hold-loop.mp4', audio: false, previous: true},
+	{id: 'CountdownRevealVertical', file: 'previous/social-vertical-9x16.mp4', audio: true, previous: true},
 ];
 
 const serveUrl = await bundle({entryPoint: path.resolve('src/index.ts')});
 
-for (const job of JOBS.filter((j) => !only || only.includes(j.id))) {
+for (const job of JOBS.filter((j) => (only ? only.includes(j.id) : !j.previous))) {
+	mkdirSync(path.dirname(path.join(OUT, job.file)), {recursive: true});
 	const composition = await selectComposition({serveUrl, id: job.id, browserExecutable});
-	const raw = path.join(TMP, `raw-${job.file}`);
+	const raw = path.join(TMP, `raw-${path.basename(job.file)}`);
 	console.log(`Rendering ${job.id} (${composition.durationInFrames} frames)…`);
 	await renderMedia({
 		serveUrl,
@@ -46,6 +50,8 @@ for (const job of JOBS.filter((j) => !only || only.includes(j.id))) {
 	}
 }
 
-const logo = await selectComposition({serveUrl, id: 'LogoLoop', browserExecutable});
-await renderStill({serveUrl, composition: logo, frame: 0, output: path.join(OUT, 'logo-screen.png'), imageFormat: 'png', browserExecutable});
+if (!only) {
+	const main = await selectComposition({serveUrl, id: 'EveryPointCounts', browserExecutable});
+	await renderStill({serveUrl, composition: main, frame: main.durationInFrames - 1, output: path.join(OUT, 'logo-screen.png'), imageFormat: 'png', browserExecutable});
+}
 console.log('Done: renders/');
