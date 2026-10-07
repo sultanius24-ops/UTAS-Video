@@ -2,14 +2,13 @@
   "name": "utas-quality-day-promo",
   "version": "1.0.0",
   "private": true,
-  "description": "UTAS Quality Day promo video, built with Remotion",
+  "description": "UTAS Quality Day new logo countdown, built with Remotion",
   "scripts": {
     "studio": "remotion studio",
     "render": "remotion render QualityDayPromo out/raw.mp4 --audio-codec=aac --audio-bitrate=320k && node scripts/master.mjs out/raw.mp4 out/quality-day-promo.mp4",
-    "still": "remotion still QualityDayPromo out/poster.png --frame=960",
+    "still": "remotion still QualityDayPromo out/poster.png --frame=560",
     "typecheck": "tsc --noEmit",
-    "generate:audio": "python scripts/generate_audio.py",
-    "generate:voiceover": "python scripts/generate_voiceover.py"
+    "generate:audio": "python scripts/generate_audio.py"
   },
   "dependencies": {
     "@remotion/cli": "4.0.533",

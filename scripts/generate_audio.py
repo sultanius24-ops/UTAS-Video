@@ -1,4 +1,4 @@
-"""Synthesise the sound design for the promo: SFX one-shots and a cinematic music bed.
+"""Synthesise the sound design for the countdown: SFX one-shots and a music bed.
 
 Everything is generated from scratch with numpy/scipy (seeded, so output is
 reproducible and royalty-free). Usage:
@@ -156,22 +156,6 @@ def sparkle(dur=1.8, notes=(86, 90, 93, 98, 102)):
     return reverb(hp(out, 1500), seconds=2.5, wet=0.5, tone=10000)
 
 
-def pop(note, dur=0.5):
-    t = t_axis(dur)
-    f = midi(note) * (1 + 0.6 * np.exp(-t / 0.012))
-    x = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t / 0.085)
-    x += 0.25 * np.sin(2 * np.pi * np.cumsum(2 * f) / SR) * np.exp(-t / 0.04)
-    x += hp(noise(len(t)), 3000) * np.exp(-t / 0.004) * 0.15
-    return reverb(x, seconds=1.0, wet=0.25)
-
-
-def blip(note, dur=0.9):
-    t = t_axis(dur)
-    x = bell(midi(note), dur=dur, decay=0.22, bright=0.5)
-    x += np.sin(2 * np.pi * midi(note - 12) * t) * np.exp(-t / 0.06) * 0.4
-    return reverb(x, seconds=1.4, wet=0.3)
-
-
 def riser(dur=2.5, f_lo=300, f_hi=7000, tone=True):
     t = t_axis(dur)
     p = t / dur
@@ -189,33 +173,23 @@ def riser(dur=2.5, f_lo=300, f_hi=7000, tone=True):
     return x
 
 
-def reverse_swell(dur=1.4):
+def count_hit(final=False, dur=1.6):
+    """Countdown beat: sub thump + clock click + short tonal ping (brighter for the final numbers)."""
     t = t_axis(dur)
-    hit = hp(noise(len(t)), 800) * np.exp(-t / 0.25)
-    hit += bell(midi(74), dur=dur, decay=0.5, bright=0.4) * 0.6
-    wet = reverb(hit, seconds=dur, wet=0.85, tone=8000)[: len(t)]
-    return wet[::-1].copy()
+    f = 42 + 60 * np.exp(-t * 18)
+    thump = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t / (0.32 if final else 0.22))
+    click = hp(noise(len(t)), 3000) * np.exp(-t / 0.006) * 0.45
+    ping = bell(midi(81 if final else 74), dur=dur, decay=0.25, bright=0.4) * (0.35 if final else 0.22)
+    body = lp(noise(len(t)), 400) * np.exp(-t / 0.05) * 0.4
+    x = np.tanh(1.5 * (thump + click + ping + body))
+    x *= np.clip((dur - t) / 0.3, 0, 1)
+    return reverb(x, seconds=2.2 if final else 1.4, wet=0.3 if final else 0.22, tone=4000)
 
 
-def counter_ticks(scene_frames=(18, 120), days=60, dur=3.6):
-    """One soft tick each time the on-screen counter advances two days (follows its easing)."""
-    n = int(dur * SR)
-    out = np.zeros((n, 2))
-    start, end = scene_frames
-    last = -1
-    for frame in range(start, end + 1):
-        p = (frame - start) / (end - start)
-        eased = 1 - (1 - p) ** 4  # close to the on-screen bezier(0.22, 1, 0.36, 1)
-        step = int(days * eased) // 2
-        if step != last:
-            last = step
-            onset = int((frame - start) / FPS * SR)
-            t = t_axis(0.06)
-            tick = np.sin(2 * np.pi * (2200 + 8 * step) * t) * np.exp(-t / 0.008)
-            tick += hp(noise(len(t)), 4000) * np.exp(-t / 0.003) * 0.3
-            seg = stereo(tick, rng.uniform(-0.3, 0.3))
-            out[onset : onset + len(seg)] += seg[: n - onset]
-    return reverb(out, seconds=0.8, wet=0.2)
+def tock(dur=0.5):
+    t = t_axis(dur)
+    x = np.sin(2 * np.pi * 1250 * t) * np.exp(-t / 0.01) + hp(noise(len(t)), 2500) * np.exp(-t / 0.004) * 0.4
+    return reverb(stereo(x, 0.15), seconds=0.7, wet=0.2)
 
 
 # ---------------------------------------------------------------- music bed
@@ -223,69 +197,65 @@ def saw(freq, t, harmonics=14):
     return sum(np.sin(2 * np.pi * freq * k * t) / k for k in range(1, harmonics + 1))
 
 
-def music_bed(total_frames, logo_hit, journey_start, patronage_start, finale_start):
+def music_bed(total_frames, countdown_end, logo_hit, **_):
+    """Suspense drone that tightens through the countdown, a breath of silence, then a bright resolve."""
     dur = total_frames / FPS + 0.5
     n = int(dur * SR)
     t = np.arange(n) / SR
     mix = np.zeros((n, 2))
+    end_s, hit_s = countdown_end / FPS, logo_hit / FPS
 
-    D, Bm7, G, A, Asus = [50, 57, 62, 64, 66], [47, 54, 59, 62, 66], [43, 55, 59, 62, 66], [45, 52, 57, 61, 64], [45, 52, 57, 62, 64]
-    hit_s = logo_hit / FPS
-    j_s, p_s, f_s = journey_start / FPS, patronage_start / FPS, finale_start / FPS
-    chords = [
-        (0.0, D), (5.3, Bm7), (j_s, G), (j_s + 3.6, A), (j_s + 7.2, D), (p_s, Bm7),
-        (p_s + 3.5, G), (f_s - 1.6, Asus), (f_s + 0.2, A), (hit_s, D),
-    ]
-    ends = [c[0] for c in chords[1:]] + [dur]
+    # 1) Countdown drone: D sus2 with a filter that slowly opens, plus a rising high tension tone.
+    seg = t < hit_s
+    tt = t[seg]
+    p = tt / hit_s
+    drone = np.zeros((seg.sum(), 2))
+    for i, note in enumerate([38, 45, 50, 52, 57]):
+        for d, pan in ((-0.08, -0.7), (0.0, 0.0), (0.08, 0.7)):
+            drone += stereo(saw(midi(note + d), tt, 8) * (0.8 if i == 0 else 0.45), pan)
+    # Block-wise low-pass sweep 500 Hz -> 3 kHz
+    blocks = 40
+    out = np.zeros_like(drone)
+    edges = np.linspace(0, len(tt), blocks + 1).astype(int)
+    for k in range(blocks):
+        fc = 500 * (6 ** (k / blocks))
+        lo, hi = max(0, edges[k] - 2400), edges[k + 1]
+        filt = lp(drone[lo:hi], fc)
+        out[edges[k]:hi] = filt[edges[k] - lo:]
+    env = (0.35 + 0.65 * p**1.5) * np.minimum(1, tt / 1.5)
+    # Breath of silence right before the hit
+    env *= np.clip((hit_s - 0.28 - tt) / 0.12, 0, 1)
+    mix[seg] += out * env[:, None] * 0.10
+    tension = np.sin(2 * np.pi * midi(81) * tt * (1 + 0.003 * np.sin(2 * np.pi * 6 * tt)))
+    tension_env = np.clip((tt - (end_s - 4)) / 4, 0, 1) ** 2 * np.clip((hit_s - 0.28 - tt) / 0.12, 0, 1)
+    mix[seg] += stereo(tension * tension_env * 0.05)
 
-    # Warm detuned pad with slow swells, crossfading between chords.
-    for (start, notes), end in zip(chords, ends):
-        rel = 1.6 if end < dur else 0.0
-        seg = (t >= start) & (t < end + rel)
-        tt = t[seg] - start
-        att = 1.4 if start > 0 else 2.5
-        env = np.minimum(1, tt / att)
-        env *= np.where(t[seg] > end, np.maximum(0, 1 - (t[seg] - end) / max(rel, 1e-3)), 1)
-        if end >= dur:
-            env *= np.clip((dur - 0.3 - t[seg]) / 5.5, 0, 1)  # final chord fades to the end
-        voice = np.zeros((seg.sum(), 2))
-        for i, note in enumerate(notes):
-            for d, pan in ((-0.07, -0.6), (0.0, 0.0), (0.07, 0.6)):
-                f = midi(note + d)
-                voice += stereo(saw(f, tt, 10) * (0.7 if i == 0 else 0.45), pan)
-        voice = lp(voice, 2200 if start < hit_s else 3200)
-        mix[seg] += voice * env[:, None] * 0.12
-        # Sub on the root
-        sub = np.sin(2 * np.pi * midi(notes[0] - 12 if notes[0] > 45 else notes[0]) * tt)
-        mix[seg] += stereo(sub * env * 0.12)
-
-    # Pulse section (journey -> values): plucked arpeggio + soft heartbeat kick at 100 bpm.
-    beat = 60 / 100
-    eighth = beat / 2
-    arp_end = p_s - 0.2
-    k = 0
-    tt_pl = t_axis(0.9)
-    pattern = [0, 2, 3, 4, 3, 2, 1, 2]
-    s = j_s
-    while s < arp_end:
-        current = [c for c in chords if c[0] <= s][-1][1]
-        note = current[pattern[k % len(pattern)]] + 12
-        pluck = (np.sin(2 * np.pi * midi(note) * tt_pl) + 0.3 * np.sin(4 * np.pi * midi(note) * tt_pl)) * np.exp(-tt_pl / 0.28)
+    # 2) Resolve: big bright D major chord, sub, and a gentle celebratory arpeggio.
+    seg = t >= hit_s
+    tt = t[seg] - hit_s
+    fade = np.clip((dur - 0.3 - t[seg]) / 3.5, 0, 1)
+    env = np.minimum(1, tt / 0.04) * (0.6 + 0.4 * np.exp(-tt / 1.5)) * fade
+    chord = np.zeros((seg.sum(), 2))
+    for i, note in enumerate([50, 57, 62, 66, 69, 76]):
+        for d, pan in ((-0.07, -0.6), (0.0, 0.0), (0.07, 0.6)):
+            chord += stereo(saw(midi(note + d), tt, 10) * (0.7 if i == 0 else 0.42), pan)
+    mix[seg] += lp(chord, 3200) * env[:, None] * 0.10
+    mix[seg] += stereo(np.sin(2 * np.pi * midi(38) * tt) * env * 0.16)
+    tt_pl = t_axis(1.2)
+    arp = [74, 78, 81, 86, 81, 78]
+    s_time, k = hit_s + 1.0, 0
+    while s_time < dur - 2.5:
+        note = arp[k % len(arp)]
+        pluck = (np.sin(2 * np.pi * midi(note) * tt_pl) + 0.3 * np.sin(4 * np.pi * midi(note) * tt_pl)) * np.exp(-tt_pl / 0.4)
         pluck *= np.minimum(1, tt_pl / 0.004)
-        fade_in = min(1, (s - j_s) / 2.5)
-        i0 = int(s * SR)
-        seg = stereo(lp(pluck, 3500), 0.5 * np.sin(k * 0.9)) * 0.10 * fade_in
-        mix[i0 : i0 + len(seg)] += seg[: n - i0]
-        if k % 4 == 0:
-            tk = t_axis(0.45)
-            kick = np.sin(2 * np.pi * np.cumsum(45 + 70 * np.exp(-tk * 30)) / SR) * np.exp(-tk / 0.18)
-            seg = stereo(kick) * 0.22 * fade_in
-            mix[i0 : i0 + len(seg)] += seg[: n - i0]
-        s += eighth
+        i0 = int(s_time * SR)
+        piece = stereo(lp(pluck, 4000), 0.5 * np.sin(k * 0.9)) * 0.07 * min(1, (s_time - hit_s - 1.0) / 1.5 + 0.3)
+        mix[i0 : i0 + len(piece)] += piece[: n - i0]
+        s_time += 0.3
         k += 1
 
-    mix = reverb(mix, seconds=3.5, wet=0.35, tone=4500)[:n]
-    mix[: int(0.5 * SR)] *= np.linspace(0, 1, int(0.5 * SR))[:, None]
+    mix = reverb(mix, seconds=3.5, wet=0.33, tone=5000)[:n]
+    mix[: int(0.3 * SR)] *= np.linspace(0, 1, int(0.3 * SR))[:, None]
     mix = np.tanh(mix / (np.max(np.abs(mix)) or 1) * 1.2)
     mix = (mix / np.max(np.abs(mix)) * 0.85).astype(np.float32)
     path = ROOT / "public/audio/music-bed.wav"
@@ -297,20 +267,14 @@ if __name__ == "__main__":
     import json
 
     timing = json.loads((ROOT / "src/audio/timing.json").read_text())
-    write("whoosh-big", whoosh(1.2, 0.5, 220, 4800))
+    write("count-hit", count_hit())
+    write("count-hit-final", count_hit(final=True))
+    write("tock", tock())
     write("whoosh-soft", whoosh(0.9, 0.45, 600, 6000, -0.4, 0.4, body=0.3))
     write("whoosh-reverse", whoosh(1.0, 0.45, 400, 5200, 0.8, -0.8))
     write("impact-big", impact(3.4, big=True))
-    write("impact-soft", impact(2.2, big=False))
     write("shimmer", shimmer())
     write("shimmer-soft", shimmer(2.0, count=10, spread=0.4, base=79))
     write("sparkle", sparkle())
-    write("ding", reverb(bell(midi(86), 2.4, 0.9, 0.7) + 0.5 * bell(midi(93), 2.4, 0.7, 0.5), seconds=2.6, wet=0.4))
-    for i, note in enumerate([74, 76, 78, 81]):
-        write(f"pop-{i + 1}", pop(note))
-    for i, note in enumerate([74, 76, 78, 81, 86]):
-        write(f"blip-{i + 1}", blip(note))
     write("riser-long", riser(2.6))
-    write("swell", reverse_swell(1.4))
-    write("counter-ticks", counter_ticks())
     music_bed(**timing)

@@ -4,19 +4,6 @@ import type {TransitionPresentation, TransitionPresentationComponentProps} from 
 
 type Empty = Record<string, never>;
 
-// Exiting scene pushes forward and blurs out while the next scene settles in from a slight zoom.
-const ZoomThrough: React.FC<TransitionPresentationComponentProps<Empty>> = ({children, presentationDirection, presentationProgress: p}) => {
-	const exiting = presentationDirection === 'exiting';
-	const scale = exiting ? 1 + p * 0.35 : 1.25 - p * 0.25;
-	const opacity = exiting ? 1 - p : p;
-	const blur = exiting ? p * 18 : (1 - p) * 18;
-	return (
-		<AbsoluteFill style={{transform: `scale(${scale})`, opacity, filter: `blur(${blur}px)`}}>{children}</AbsoluteFill>
-	);
-};
-
-export const zoomThrough = (): TransitionPresentation<Empty> => ({component: ZoomThrough, props: {} as Empty});
-
 // Dark scene dissolves through a bright flash into the light logo scene.
 const FlashThrough: React.FC<TransitionPresentationComponentProps<Empty>> = ({children, presentationDirection, presentationProgress: p}) => {
 	const exiting = presentationDirection === 'exiting';

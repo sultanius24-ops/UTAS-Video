@@ -1,47 +1,35 @@
-# UTAS Quality Day 2026 — Promo Video
+# UTAS Quality Day 2026: New Logo Countdown
 
-A 40 second (1920×1080, 30 fps) promo video with a male voice-over, sound design and music, built with [Remotion](https://www.remotion.dev).
-It's meant to open the Quality Day inauguration ceremony in front of the Event Sponsor.
+A 21 second (1920×1080, 30 fps) countdown that ends with the new Quality Day logo appearing. It's built with [Remotion](https://www.remotion.dev) and meant for the logo unveiling at the inauguration ceremony.
 
 The latest render is in [`renders/quality-day-promo.mp4`](renders/quality-day-promo.mp4).
 
-## Storyboard
+## Sequence
 
-| # | Scene | Time | Voice-over |
-|---|-------|------|------------|
-| 1 | Opening: logo bars rise, university name | 0–6s | "The University of Technology and Applied Sciences... proudly presents." |
-| 2 | Title: **QUALITY DAY** over the campus photo, wave ribbons | 5–11s | "Quality Day... twenty twenty-six." |
-| 3 | The Journey: 60-day counter, 8-week timeline | 11–19s | "Two months in the making. Sixty days of planning, teamwork, and dedication... all leading to this moment." |
-| 4 | Our Commitment: split-screen photo, values | 18–25s | "Building a culture of quality... through excellence, innovation, and continuous improvement." |
-| 5 | Inauguration: Under the Patronage of the Event Sponsor | 24–32s | "Under the patronage of our distinguished event sponsor... we welcome you to the inauguration of Quality Day." |
-| 6 | Logo finale: flash, swooshes, logo hit, shine | 31–40s | "Quality Day, twenty twenty-six. Because quality... is a journey of excellence." |
+| Time | What happens |
+|------|--------------|
+| 0–1s | "Unveiling the New Logo / تدشين الشعار الجديد" and the countdown ring settle in |
+| 1–11s | Countdown **10 → 1**, one number per second. A ring sweeps each second, an outer segment lights per second, and a shockwave pulses on each beat |
+| 8–11s | Final stretch **3 · 2 · 1**: orange numbers, warm glow, slow camera push and a riser |
+| 11–12s | White flash |
+| 12–21s | Logo reveal: swoosh arcs, logo lands with a hit and particle burst, a shine sweeps across, then QUALITY DAY 2026, يوم الجودة, the university name and the tagline. The logo holds to the end |
 
 ## Audio
 
-Everything is generated locally, so there are no licensing issues:
+Everything is synthesised locally by `scripts/generate_audio.py`, so there are no licensing issues:
 
-- **Voice-over**: the male voice `am_michael` from [Kokoro](https://github.com/thewh1teagle/kokoro-onnx), an open neural TTS model. The lines live in `voiceover/script.json`. The generator writes `public/audio/vo/*.wav` and `src/audio/voiceover.json` (frame placement and length).
-- **Sound effects**: whooshes on every transition, cinematic hits on the title and logo, pops on the bars and values, counter ticks, milestone blips, shimmers, and a riser into the logo reveal. They are synthesised by `scripts/generate_audio.py`. The cue sheet is in `src/audio/Soundtrack.tsx`.
-- **Music bed**: a synthesised cinematic pad in D major, with a pulse under the Journey and Values scenes. It resolves on the logo hit and dips automatically under the voice-over.
-- **Master**: `scripts/master.mjs` normalises the final mix to -16 LUFS with a -1.5 dBTP ceiling.
+- A thump, click and ping on every number (heavier for 3-2-1) and a soft "tock" on each half second.
+- A riser into the flash, a cinematic hit and shimmer on the logo, and a sparkle on the shine.
+- Music bed: a suspense drone that opens up through the countdown, then resolves to a bright D major chord with a gentle arpeggio when the logo lands.
+- `scripts/master.mjs` normalises the final mix to -16 LUFS with a -1.5 dBTP ceiling.
 
-To change the narration (for example, to say the sponsor's name), edit `voiceover/script.json` and regenerate:
-
-```bash
-pip install kokoro-onnx soundfile numpy scipy
-# model files: https://github.com/thewh1teagle/kokoro-onnx/releases/tag/model-files-v1.0
-python scripts/generate_voiceover.py kokoro-v1.0.onnx voices-v1.0.bin
-```
-
-If a line ends up longer than its scene, lengthen the scene (`*_DURATION` in `src/scenes/`), move the line's `from`, and update `src/audio/timing.json`. Then re-run `python scripts/generate_audio.py` so the music bed follows. Studio logs a warning if `timing.json` is out of date.
+The cue sheet is in `src/audio/Soundtrack.tsx`.
 
 ## Customise
 
-All text is in `src/schema.ts` (`defaultPromoProps`). You can also edit it live in Remotion Studio's props panel.
-
-- `sponsorName` / `sponsorTitle`: **put the patron's real name and title here before the ceremony.**
-- `monthsOfWork`: drives the days counter, the weeks stat and the "Two Months" headline.
-- `musicFile`: leave empty for the built-in music bed, or set a file in `public/` (e.g. `music.mp3`) to replace it. Ducking under the voice-over still applies.
+- Text (kicker, title, year, university name, tagline): `src/schema.ts`. You can also edit it live in Remotion Studio's props panel.
+- Countdown length: `COUNT_FROM` in `src/scenes/Countdown.tsx`. Then update `src/audio/timing.json` (Studio warns if it's stale) and re-run `python scripts/generate_audio.py` so the music follows.
+- `musicFile`: set a file in `public/` to replace the built-in music bed.
 
 ## Commands
 
@@ -49,10 +37,5 @@ All text is in `src/schema.ts` (`defaultPromoProps`). You can also edit it live 
 npm install
 npm run studio   # live preview and editing
 npm run render   # renders and masters out/quality-day-promo.mp4
+pip install numpy scipy soundfile && npm run generate:audio   # rebuild SFX and music
 ```
-
-## Assets
-
-- `public/images/quality-day-logo.png`: the new logo, with its white background converted to transparency
-- `public/images/campus-*.jpg`: campus photos
-- `public/fonts/`: Montserrat (Latin) and Cairo (Arabic), bundled locally so renders don't need the network

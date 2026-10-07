@@ -6,7 +6,7 @@ import {WaveRibbons} from '../components/WaveRibbons';
 import {PromoProps} from '../schema';
 import {colors, fonts, gradients} from '../theme';
 
-export const FINALE_DURATION = 270;
+export const FINALE_DURATION = 300;
 
 const LOGO = staticFile('images/quality-day-logo.png');
 const LOGO_W = 780;
