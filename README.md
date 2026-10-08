@@ -1,8 +1,30 @@
 # UTAS Quality Day 2026: New Logo Unveiling
 
-Videos for unveiling the new Quality Day logo at the inauguration ceremony, built with [Remotion](https://www.remotion.dev).
+Videos for unveiling the new Quality Day logo at the inauguration ceremony, built with [Remotion](https://www.remotion.dev). `renders/logo-screen.png` is the final frame of the current video, for slides or a fallback.
 
-## Current concept: "Every Point Counts" (كل نقطة تصنع الجودة)
+## Current: "Golden Unveil" (`renders/golden-unveil.mp4`)
+
+The campus at dusk (`public/images/campus-dusk.jpg`), 1920×1080, 26s, with sound.
+
+| Time | What happens |
+|------|--------------|
+| 0–1s | Fade in on the campus at dusk |
+| 1–11s | Gold countdown **10 → 1** in the top-left. A gold light with a sparkling tail travels around the building (towers, crenellated walls, dome, base), leaving a glowing trace |
+| 11–12s | The loop closes: the outline flashes and the building lights up |
+| 12–20s | The logo arrives **slowly, part by part**. The wave, then each of the four bars, the Q ring and the building rise from below the frame with gold trails, and settle one after another in the sky beside the flag |
+| 20–26s | Gold shine across the logo. Then QUALITY DAY 2026, يوم الجودة, the tagline and the university name in the sky at top-left |
+
+- **Building outline:** traced by hand in `src/gold/outline.ts`, in photo pixel coordinates. The base line is routed above the billboard so the light never crosses it.
+- **Logo:** position and size beside the flag are set by `LOGO_PHOTO` in `src/scenes/GoldenUnveil.tsx`.
+- **Timing:** the countdown, light-up, the order each logo part rises in and their speed are all in `src/gold/timing.ts`.
+- **Sound** (`src/audio/GoldSoundtrack.tsx`):
+  - A shimmering trail that pans with the light around the building, and a beat on each number.
+  - A riser, then a hit as the outline completes.
+  - A whoosh and chime for each logo part, and a sparkle on the shine.
+
+## Earlier concept: "Every Point Counts"
+
+Renders are in `renders/every-point-counts/`. Re-render with `--only=EveryPointCounts,EveryPointCountsVertical`.
 
 The whole video is made of **6,000 points of light**. Each one stands for a contribution: a person, an effort, a day of the two months of work.
 
@@ -14,10 +36,9 @@ The whole video is made of **6,000 points of light**. Each one stands for a cont
 | 13–15s | The points fly back and settle left to right into the **new logo**, each taking its real colour |
 | 15–25s | The crisp logo resolves out of the points, then QUALITY DAY 2026, يوم الجودة, the university name and **"Quality is Everyone's Responsibility · الجودة مسؤولية الجميع"** |
 
-Files in [`renders/`](renders/):
+Files in [`renders/every-point-counts/`](renders/every-point-counts/):
 - `every-point-counts.mp4`: 1920×1080, 25s, with sound.
 - `every-point-counts-vertical-9x16.mp4`: for Instagram Reels, Stories and WhatsApp status.
-- `logo-screen.png`: the final frame, for slides or a fallback.
 
 How it works: the digits are sampled from the real Montserrat glyphs and the logo from its image (`src/particles/targets.ts`), with a seeded random generator so every render is identical. Points are matched between shapes along a Hilbert curve, so each morph flows coherently instead of scrambling. Timing lives in `src/particles/timing.ts`.
 

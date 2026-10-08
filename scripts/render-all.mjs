@@ -14,9 +14,10 @@ mkdirSync(OUT, {recursive: true});
 mkdirSync(TMP, {recursive: true});
 
 const JOBS = [
-	{id: 'EveryPointCounts', file: 'every-point-counts.mp4', audio: true},
-	{id: 'EveryPointCountsVertical', file: 'every-point-counts-vertical-9x16.mp4', audio: true},
-	// Previous concept (render with --only=...):
+	{id: 'GoldenUnveil', file: 'golden-unveil.mp4', audio: true},
+	// Earlier concepts (render with --only=...):
+	{id: 'EveryPointCounts', file: 'every-point-counts/every-point-counts.mp4', audio: true, previous: true},
+	{id: 'EveryPointCountsVertical', file: 'every-point-counts/every-point-counts-vertical-9x16.mp4', audio: true, previous: true},
 	{id: 'Standby', file: 'previous/1-standby-loop.mp4', audio: false, previous: true},
 	{id: 'CountdownReveal', file: 'previous/2-countdown-logo-reveal.mp4', audio: true, previous: true},
 	{id: 'LogoLoop', file: 'previous/3-logo-hold-loop.mp4', audio: false, previous: true},
@@ -51,7 +52,7 @@ for (const job of JOBS.filter((j) => (only ? only.includes(j.id) : !j.previous))
 }
 
 if (!only) {
-	const main = await selectComposition({serveUrl, id: 'EveryPointCounts', browserExecutable});
+	const main = await selectComposition({serveUrl, id: 'GoldenUnveil', browserExecutable});
 	await renderStill({serveUrl, composition: main, frame: main.durationInFrames - 1, output: path.join(OUT, 'logo-screen.png'), imageFormat: 'png', browserExecutable});
 }
 console.log('Done: renders/');

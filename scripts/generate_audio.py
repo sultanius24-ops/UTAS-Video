@@ -201,6 +201,22 @@ def assemble(dur=2.8, grains=90):
     return reverb(hp(out, 500), seconds=2.6, wet=0.4, tone=10000)
 
 
+def gold_trail(dur=10.6):
+    """Shimmering trail for the light circling the building; pans left -> right -> left with it."""
+    n = int(dur * SR)
+    t = np.arange(n) / SR
+    p = t / dur
+    pan = -0.75 * np.cos(2 * np.pi * p)
+    env = np.clip(t / 0.8, 0, 1) * np.clip((dur - t) / 0.6, 0, 1)
+    air = svf_bandpass(pink(n), 4200 + 1800 * np.sin(2 * np.pi * 0.35 * t), q=2.5) * 0.35
+    out = stereo(air * env, pan)
+    for _ in range(int(dur * 7)):
+        onset = int(rng.uniform(0, dur - 0.3) * SR)
+        g = fit(bell(midi(rng.choice([86, 88, 90, 93, 95, 98, 100])), dur=0.5, decay=0.08, bright=0.4), n - onset)
+        out[onset:] += stereo(g * rng.uniform(0.08, 0.22) * env[onset], pan[onset])
+    return reverb(hp(out, 900), seconds=2.0, wet=0.4, tone=10000)
+
+
 def riser(dur=2.5, f_lo=300, f_hi=7000, tone=True):
     t = t_axis(dur)
     p = t / dur
@@ -328,6 +344,7 @@ if __name__ == "__main__":
     write("whoosh-big", whoosh(1.2, 0.5, 220, 4800))
     write("swarm", swarm())
     write("assemble", assemble())
+    write("gold-trail", gold_trail())
     # One music bed per video, each timed by its entry in timing.json.
     for out_name, bed in timing.items():
         music_bed(out_name, **bed)
