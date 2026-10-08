@@ -12,8 +12,8 @@ const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 const easeOut = Easing.bezier(0.16, 1, 0.3, 1);
 const easeInOut = Easing.bezier(0.45, 0, 0.55, 1);
 
-// Where the logo settles: in the sky to the right of the flag (photo pixel coordinates).
-const LOGO_PHOTO = {cx: 1500, cy: 205, w: 460};
+// Where the logo settles: in the sky above the dome, just left of the flagpole (photo pixel coordinates).
+const LOGO_PHOTO = {cx: 920, cy: 250, w: 350};
 const LOGO_ASPECT = 850 / 1328;
 const LOGO_SRC = staticFile('images/quality-day-logo.png');
 
@@ -252,10 +252,10 @@ export const GoldenUnveil: React.FC<PromoProps> = ({kicker, kickerAr, eventTitle
 				<div
 					style={{
 						position: 'absolute',
-						left: logo.x - logo.w * 0.4,
-						top: logo.y - logo.h * 0.5,
-						width: logo.w * 1.8,
-						height: logo.h * 2,
+						left: logo.x - logo.w * 0.25,
+						top: logo.y - logo.h * 0.45,
+						width: logo.w * 1.5,
+						height: logo.h * 1.9,
 						background: 'radial-gradient(ellipse at center, rgba(255,250,236,0.92) 0%, rgba(255,244,220,0.72) 30%, rgba(255,226,170,0.3) 52%, rgba(255,210,140,0.08) 66%, transparent 76%)',
 						opacity: halo,
 						filter: 'blur(14px)',
@@ -284,6 +284,7 @@ export const GoldenUnveil: React.FC<PromoProps> = ({kicker, kickerAr, eventTitle
 
 			{/* Darken the top-left so the countdown and title read clearly */}
 			<AbsoluteFill style={{background: 'radial-gradient(ellipse 55% 60% at 0% 0%, rgba(2,8,28,0.75), transparent 70%)'}} />
+			<AbsoluteFill style={{background: 'radial-gradient(ellipse 45% 55% at 100% 0%, rgba(2,8,28,0.6), transparent 70%)', opacity: interpolate(frame, [TITLE - 20, TITLE + 10], [0, 1], clamp)}} />
 
 			{/* Countdown, top-left */}
 			<div style={{position: 'absolute', left: 90, top: 52, opacity: panelIn * panelOut}}>
@@ -297,16 +298,16 @@ export const GoldenUnveil: React.FC<PromoProps> = ({kicker, kickerAr, eventTitle
 				</div>
 			</div>
 
-			{/* Title, top-left in the sky, once the logo has arrived */}
-			<div style={{position: 'absolute', left: 90, top: 58}}>
+			{/* Title, in the sky on the right, once the logo has arrived */}
+			<div style={{position: 'absolute', right: 90, top: 58, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', textAlign: 'right'}}>
 				<div style={{display: 'flex', alignItems: 'baseline', gap: 20, opacity: titleIn(0), transform: `translateY(${(1 - titleIn(0)) * 24}px)`}}>
 					<div style={{fontFamily: fonts.display, fontWeight: 900, fontSize: 70, lineHeight: 1, color: '#FFFFFF', textShadow: '0 6px 30px rgba(0,0,0,0.5)'}}>{eventTitle.toUpperCase()}</div>
 					<div style={{fontFamily: fonts.display, fontWeight: 900, fontSize: 70, lineHeight: 1, color: GOLD, textShadow: '0 0 30px rgba(242,193,78,0.5)'}}>{year}</div>
 				</div>
-				<div style={{fontFamily: fonts.arabic, fontWeight: 800, fontSize: 52, lineHeight: 1.35, color: GOLD_LIGHT, direction: 'rtl', textAlign: 'left', opacity: titleIn(10), transform: `translateY(${(1 - titleIn(10)) * 24}px)`}}>
+				<div style={{fontFamily: fonts.arabic, fontWeight: 800, fontSize: 52, lineHeight: 1.35, color: GOLD_LIGHT, direction: 'rtl', textAlign: 'right', opacity: titleIn(10), transform: `translateY(${(1 - titleIn(10)) * 24}px)`}}>
 					{eventTitleAr}
 				</div>
-				<div style={{width: 140 * titleIn(20), height: 3, background: `linear-gradient(90deg, ${GOLD}, transparent)`, margin: '10px 0 12px'}} />
+				<div style={{width: 140 * titleIn(20), height: 3, background: `linear-gradient(270deg, ${GOLD}, transparent)`, margin: '10px 0 12px'}} />
 				<div style={{display: 'flex', alignItems: 'center', gap: 16, opacity: titleIn(26)}}>
 					<div style={{fontFamily: fonts.display, fontWeight: 500, fontSize: 21, color: GOLD_LIGHT}}>{tagline}</div>
 					<div style={{width: 2, height: 22, background: GOLD}} />
