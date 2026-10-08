@@ -209,7 +209,7 @@ const GoldNumber: React.FC<{n: number; local: number}> = ({n, local}) => {
 	);
 };
 
-export const GoldenUnveil: React.FC<PromoProps> = ({kicker, kickerAr}) => {
+export const GoldenUnveil: React.FC<PromoProps> = ({eventTitle, eventTitleAr}) => {
 	const frame = useCurrentFrame();
 	const {width, durationInFrames} = useVideoConfig();
 	const k = width / PHOTO.w;
@@ -286,8 +286,8 @@ export const GoldenUnveil: React.FC<PromoProps> = ({kicker, kickerAr}) => {
 
 			{/* Countdown, top-left */}
 			<div style={{position: 'absolute', left: 90, top: 52, opacity: panelIn * panelOut}}>
-				<div style={{fontFamily: fonts.display, fontWeight: 700, fontSize: 22, letterSpacing: '0.42em', textTransform: 'uppercase', color: GOLD}}>{kicker}</div>
-				<div style={{fontFamily: fonts.arabic, fontWeight: 700, fontSize: 34, color: '#FFFFFF', direction: 'rtl', textAlign: 'left', marginTop: 2}}>{kickerAr}</div>
+				<div style={{fontFamily: fonts.display, fontWeight: 700, fontSize: 22, letterSpacing: '0.42em', textTransform: 'uppercase', color: GOLD}}>{eventTitle}</div>
+				<div style={{fontFamily: fonts.arabic, fontWeight: 700, fontSize: 34, color: '#FFFFFF', direction: 'rtl', textAlign: 'left', marginTop: 2}}>{eventTitleAr}</div>
 				<div style={{position: 'relative', width: 420, height: 190, marginTop: 4}}>
 					{counting ? <GoldNumber key={idx} n={COUNT_FROM - idx} local={local} /> : null}
 				</div>
