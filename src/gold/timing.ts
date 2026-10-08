@@ -20,4 +20,8 @@ export const PARTS: {layer: string; start: number}[] = [
 ];
 export const LOGO_DONE = 516 + RISE_DURATION; // 606
 export const SHINE = LOGO_DONE + 6;
-export const DURATION = 780;
+// Final camera push-in onto the logo, then a second shine once it settles.
+export const ZOOM = [640, 752];
+export const ZOOM_SCALE = 2.2;
+export const SHINE_2 = 756;
+export const DURATION = 810;

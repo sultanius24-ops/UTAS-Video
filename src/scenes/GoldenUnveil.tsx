@@ -1,7 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, Easing, Img, interpolate, random, spring, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {OUTLINE_D, OUTLINE_LENGTH as L, PHOTO, pointAt} from '../gold/outline';
-import {COUNT_END, COUNT_FROM, COUNT_START, FADE_IN, FINAL_STRETCH, LIGHT_UP, LOGO_DONE, PARTS, RISE_DURATION, SHINE, STEP} from '../gold/timing';
+import {COUNT_END, COUNT_FROM, COUNT_START, FADE_IN, FINAL_STRETCH, LIGHT_UP, LOGO_DONE, PARTS, RISE_DURATION, SHINE, SHINE_2, STEP, ZOOM, ZOOM_SCALE} from '../gold/timing';
 import {PromoProps} from '../schema';
 import {fonts} from '../theme';
 
@@ -211,17 +211,26 @@ const GoldNumber: React.FC<{n: number; local: number}> = ({n, local}) => {
 
 export const GoldenUnveil: React.FC<PromoProps> = ({eventTitle, eventTitleAr}) => {
 	const frame = useCurrentFrame();
-	const {width, durationInFrames} = useVideoConfig();
+	const {width, height, durationInFrames} = useVideoConfig();
 	const k = width / PHOTO.w;
 	const logoW = LOGO_PHOTO.w * k;
 	const logoH = logoW * LOGO_ASPECT;
 	const logo = {x: LOGO_PHOTO.cx * k - logoW / 2, y: LOGO_PHOTO.cy * k - logoH / 2, w: logoW, h: logoH};
 
-	const camera = interpolate(frame, [0, durationInFrames], [1.0, 1.06], clamp);
+	// Camera: a slow push-in for the whole video, then a final glide in onto the logo that brings it
+	// to the centre of the frame. Expressed as translate + scale around the top-left corner.
+	const drift = interpolate(frame, [0, durationInFrames], [1.0, 1.06], clamp);
+	const origin = {x: width * 0.62, y: height * 0.22};
+	const zoom = interpolate(frame, ZOOM, [0, 1], {...clamp, easing: Easing.bezier(0.65, 0, 0.25, 1)});
+	const logoCentre = {x: LOGO_PHOTO.cx * k, y: LOGO_PHOTO.cy * k};
+	const driftScreen = {x: origin.x + drift * (logoCentre.x - origin.x), y: origin.y + drift * (logoCentre.y - origin.y)};
+	const scale = drift * (1 + (ZOOM_SCALE - 1) * zoom);
+	const target = {x: driftScreen.x + (width / 2 - driftScreen.x) * zoom, y: driftScreen.y + (height / 2 - driftScreen.y) * zoom};
+	const camera = {x: target.x - scale * logoCentre.x, y: target.y - scale * logoCentre.y, scale};
 	const lit = interpolate(frame, LIGHT_UP, [0, 1], {...clamp, easing: easeInOut});
 	const black = interpolate(frame, FADE_IN, [1, 0], clamp);
 	const halo = interpolate(frame, [PARTS[0].start + 10, LOGO_DONE], [0, 1], {...clamp, easing: easeInOut});
-	const shine = interpolate(frame, [SHINE, SHINE + 44], [-40, 140], clamp);
+	const shine = frame < SHINE_2 ? interpolate(frame, [SHINE, SHINE + 44], [-40, 140], clamp) : interpolate(frame, [SHINE_2, SHINE_2 + 40], [-40, 140], clamp);
 
 	const t = frame - COUNT_START;
 	const idx = Math.min(COUNT_FROM - 1, Math.max(0, Math.floor(t / STEP)));
@@ -233,7 +242,7 @@ export const GoldenUnveil: React.FC<PromoProps> = ({eventTitle, eventTitleAr}) =
 	return (
 		<AbsoluteFill style={{backgroundColor: '#000'}}>
 			{/* The world: photo, gold light and rising logo share one slowly pushing camera */}
-			<AbsoluteFill style={{transform: `scale(${camera})`, transformOrigin: '62% 22%'}}>
+			<AbsoluteFill style={{transform: `translate(${camera.x}px, ${camera.y}px) scale(${camera.scale})`, transformOrigin: '0 0'}}>
 				<Img
 					src={staticFile('images/campus-dusk.jpg')}
 					style={{width: '100%', height: '100%', objectFit: 'cover', filter: `brightness(${0.62 + 0.38 * lit}) saturate(${0.9 + 0.2 * lit})`}}
