@@ -1,6 +1,6 @@
 import React from 'react';
 import {Audio, interpolate, Sequence, staticFile, useVideoConfig} from 'remotion';
-import {COUNT_END, COUNT_FROM, COUNT_START, DURATION, FINAL_STRETCH, LOGO_DONE, PARTS, RISE_DURATION, SHINE, STEP, TITLE} from '../gold/timing';
+import {COUNT_END, COUNT_FROM, COUNT_START, DURATION, FINAL_STRETCH, LOGO_DONE, PARTS, RISE_DURATION, SHINE, STEP} from '../gold/timing';
 import {PromoProps} from '../schema';
 import timing from './timing.json';
 
@@ -33,10 +33,9 @@ const CUES: Cue[] = [
 		{sfx: 'whoosh-soft', at: start, volume: 0.22},
 		{sfx: LANDING[layer], at: start + Math.round(RISE_DURATION * 0.55), volume: 0.32},
 	]),
-	// Logo complete: gold shine, then the title.
+	// Logo complete: gold shine.
 	{sfx: 'impact-soft', at: LOGO_DONE - 4, volume: 0.45},
 	{sfx: 'sparkle', at: SHINE + 4, volume: 0.4},
-	{sfx: 'shimmer-soft', at: TITLE, volume: 0.25},
 ];
 
 // Mix levels leave headroom; scripts/master.mjs brings the final file up to broadcast loudness.

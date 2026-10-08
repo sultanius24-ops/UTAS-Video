@@ -1,7 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, Easing, Img, interpolate, random, spring, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {OUTLINE_D, OUTLINE_LENGTH as L, PHOTO, pointAt} from '../gold/outline';
-import {COUNT_END, COUNT_FROM, COUNT_START, FADE_IN, FINAL_STRETCH, LIGHT_UP, LOGO_DONE, PARTS, RISE_DURATION, SHINE, STEP, TITLE} from '../gold/timing';
+import {COUNT_END, COUNT_FROM, COUNT_START, FADE_IN, FINAL_STRETCH, LIGHT_UP, LOGO_DONE, PARTS, RISE_DURATION, SHINE, STEP} from '../gold/timing';
 import {PromoProps} from '../schema';
 import {fonts} from '../theme';
 
@@ -209,7 +209,7 @@ const GoldNumber: React.FC<{n: number; local: number}> = ({n, local}) => {
 	);
 };
 
-export const GoldenUnveil: React.FC<PromoProps> = ({kicker, kickerAr, eventTitle, eventTitleAr, year, universityName, tagline, taglineAr}) => {
+export const GoldenUnveil: React.FC<PromoProps> = ({kicker, kickerAr}) => {
 	const frame = useCurrentFrame();
 	const {width, durationInFrames} = useVideoConfig();
 	const k = width / PHOTO.w;
@@ -229,7 +229,6 @@ export const GoldenUnveil: React.FC<PromoProps> = ({kicker, kickerAr, eventTitle
 	const counting = t >= 0 && frame < COUNT_END;
 	const panelIn = interpolate(frame, [8, 30], [0, 1], clamp);
 	const panelOut = interpolate(frame, [COUNT_END - 4, COUNT_END + 14], [1, 0], clamp);
-	const titleIn = (d: number) => interpolate(frame, [TITLE + d, TITLE + d + 20], [0, 1], clamp);
 
 	return (
 		<AbsoluteFill style={{backgroundColor: '#000'}}>
@@ -284,7 +283,6 @@ export const GoldenUnveil: React.FC<PromoProps> = ({kicker, kickerAr, eventTitle
 
 			{/* Darken the top-left so the countdown and title read clearly */}
 			<AbsoluteFill style={{background: 'radial-gradient(ellipse 55% 60% at 0% 0%, rgba(2,8,28,0.75), transparent 70%)'}} />
-			<AbsoluteFill style={{background: 'radial-gradient(ellipse 45% 55% at 100% 0%, rgba(2,8,28,0.6), transparent 70%)', opacity: interpolate(frame, [TITLE - 20, TITLE + 10], [0, 1], clamp)}} />
 
 			{/* Countdown, top-left */}
 			<div style={{position: 'absolute', left: 90, top: 52, opacity: panelIn * panelOut}}>
@@ -295,26 +293,6 @@ export const GoldenUnveil: React.FC<PromoProps> = ({kicker, kickerAr, eventTitle
 				</div>
 				<div style={{width: 300, height: 3, background: 'rgba(242,193,78,0.25)', borderRadius: 3, marginTop: 4}}>
 					<div style={{width: `${counting ? (local / STEP) * 100 : 100}%`, height: '100%', background: `linear-gradient(90deg, ${GOLD_DEEP}, ${GOLD_LIGHT})`, borderRadius: 3, boxShadow: `0 0 10px ${GOLD}`}} />
-				</div>
-			</div>
-
-			{/* Title, in the sky on the right, once the logo has arrived */}
-			<div style={{position: 'absolute', right: 90, top: 58, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', textAlign: 'right'}}>
-				<div style={{display: 'flex', alignItems: 'baseline', gap: 20, opacity: titleIn(0), transform: `translateY(${(1 - titleIn(0)) * 24}px)`}}>
-					<div style={{fontFamily: fonts.display, fontWeight: 900, fontSize: 70, lineHeight: 1, color: '#FFFFFF', textShadow: '0 6px 30px rgba(0,0,0,0.5)'}}>{eventTitle.toUpperCase()}</div>
-					<div style={{fontFamily: fonts.display, fontWeight: 900, fontSize: 70, lineHeight: 1, color: GOLD, textShadow: '0 0 30px rgba(242,193,78,0.5)'}}>{year}</div>
-				</div>
-				<div style={{fontFamily: fonts.arabic, fontWeight: 800, fontSize: 52, lineHeight: 1.35, color: GOLD_LIGHT, direction: 'rtl', textAlign: 'right', opacity: titleIn(10), transform: `translateY(${(1 - titleIn(10)) * 24}px)`}}>
-					{eventTitleAr}
-				</div>
-				<div style={{width: 140 * titleIn(20), height: 3, background: `linear-gradient(270deg, ${GOLD}, transparent)`, margin: '10px 0 12px'}} />
-				<div style={{display: 'flex', alignItems: 'center', gap: 16, opacity: titleIn(26)}}>
-					<div style={{fontFamily: fonts.display, fontWeight: 500, fontSize: 21, color: GOLD_LIGHT}}>{tagline}</div>
-					<div style={{width: 2, height: 22, background: GOLD}} />
-					<div style={{fontFamily: fonts.arabic, fontWeight: 700, fontSize: 25, color: GOLD_LIGHT, direction: 'rtl'}}>{taglineAr}</div>
-				</div>
-				<div style={{fontFamily: fonts.display, fontWeight: 600, fontSize: 15, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.85)', marginTop: 10, opacity: titleIn(36)}}>
-					{universityName}
 				</div>
 			</div>
 

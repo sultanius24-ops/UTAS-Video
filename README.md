@@ -12,7 +12,7 @@ The campus at dusk (`public/images/campus-dusk.jpg`), 1920×1080, 26s, with soun
 | 1–11s | Gold countdown **10 → 1** in the top-left. A gold light with a sparkling tail travels around the building (towers, crenellated walls, dome, base), leaving a glowing trace |
 | 11–12s | The loop closes: the outline flashes and the building lights up |
 | 12–20s | The logo arrives **slowly, part by part**. The wave, then each of the four bars, the Q ring and the building rise from below the frame with gold trails, and settle one after another in the sky above the dome, just left of the flag |
-| 20–26s | Gold shine across the logo. Then QUALITY DAY 2026, يوم الجودة, the tagline and the university name in the sky on the right |
+| 20–26s | Gold shine across the logo, then it holds on screen |
 
 - **Building outline:** traced by hand in `src/gold/outline.ts`, in photo pixel coordinates. The base line is routed above the billboard so the light never crosses it.
 - **Logo:** position and size (above the dome, left of the flag) are set by `LOGO_PHOTO` in `src/scenes/GoldenUnveil.tsx`.

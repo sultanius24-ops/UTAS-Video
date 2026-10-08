@@ -20,5 +20,4 @@ export const PARTS: {layer: string; start: number}[] = [
 ];
 export const LOGO_DONE = 516 + RISE_DURATION; // 606
 export const SHINE = LOGO_DONE + 6;
-export const TITLE = LOGO_DONE + 24;
 export const DURATION = 780;
