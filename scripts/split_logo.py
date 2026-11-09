@@ -16,7 +16,10 @@ ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "public/images/quality-day-logo.png"
 OUT = ROOT / "public/images/logo-layers"
 
-# Each big connected shape is identified by a point inside it (in logo pixel coordinates).
+# Coordinates below are in the original 1328×850 logo pixels; they're scaled to the master's size.
+REF_WIDTH = 1328
+
+# Each big connected shape is identified by a point inside it.
 SEEDS = {
     "bar-1": [(155, 500)],
     "bar-2": [(248, 450)],
@@ -38,6 +41,7 @@ REGIONS = {
 def main() -> None:
     rgba = np.asarray(Image.open(SRC).convert("RGBA"))
     alpha = rgba[..., 3] / 255.0
+    k = rgba.shape[1] / REF_WIDTH
     labels, _ = ndimage.label(alpha > 0.5)
 
     # Mark every big component with its layer index.
@@ -45,6 +49,7 @@ def main() -> None:
     names = list(SEEDS)
     for li, name in enumerate(names):
         for x, y in SEEDS[name]:
+            x, y = round(x * k), round(y * k)
             comp = labels[y, x]
             if comp == 0:
                 raise SystemExit(f"seed {name} {(x, y)} is not inside a shape")
@@ -59,7 +64,8 @@ def main() -> None:
     assignment = seeded[iy, ix]
     ys, xs = np.mgrid[0 : alpha.shape[0], 0 : alpha.shape[1]]
     free = seeded < 0
-    for name, (x0, y0, x1, y1) in REGIONS.items():
+    for name, box in REGIONS.items():
+        x0, y0, x1, y1 = (v * k for v in box)
         inside = free & (xs >= x0) & (xs <= x1) & (ys >= y0) & (ys <= y1)
         assignment[inside] = names.index(name)
 
