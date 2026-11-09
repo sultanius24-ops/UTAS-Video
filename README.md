@@ -2,9 +2,14 @@
 
 Videos for unveiling the new Quality Day logo at the inauguration ceremony, built with [Remotion](https://www.remotion.dev). `renders/logo-screen.png` is the final frame of the current video, for slides or a fallback.
 
-## Current: "Golden Unveil" (`renders/golden-unveil.mp4`)
+## Current: "Golden Unveil"
 
-The campus at dusk (`public/images/campus-dusk.jpg`), 1920×1080, 27s, with sound.
+- **`renders/golden-unveil-4k.mp4`: 3840×2160, for the big screen** (H.264 High, 27s, with sound).
+- `renders/golden-unveil.mp4`: the same at 1920×1080.
+
+The campus at dusk, 27s, with sound.
+
+**4K quality.** The source photo (2000×1125) and logo were upscaled 4× with the Real-ESRGAN x4plus AI model (`scripts/upscale.py`, run on the CPU through the ncnn library). The photo is stored at 8000×4500 (`campus-dusk.jpg`; the original is `campus-dusk-original.jpg`). The logo master and its layers are stored at 2656×1700 (`scripts/prepare_logo.py`, then `scripts/split_logo.py`). So even the final 2.2× zoom shows real detail rather than stretched pixels. The gold light, countdown and glow are vector graphics, drawn natively at 4K. The 4K job renders the 1080p composition at scale 2, encoded with x264 `slow` at CRF 15.
 
 | Time | What happens |
 |------|--------------|
